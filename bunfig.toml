@@ -1,0 +1,5 @@
+[install]
+# Use exact versions recorded in bun.lock across the workspace
+exact = false
+# Hoist workspace dependencies to the root node_modules
+linker = "hoisted"

@@ -1,0 +1,20 @@
+[
+  {
+    "description": "Photo of the main lobby reception desk, wide angle, daytime, staffed",
+    "url": "https://images.pexels.com/photos/place/lobby-reception.jpg",
+    "type": "image",
+    "tags": ["lobby", "reception", "front desk"]
+  },
+  {
+    "description": "Exterior shot of the building entrance with the company sign at street level",
+    "url": "https://images.pexels.com/photos/place/entrance.jpg",
+    "type": "image",
+    "tags": ["entrance", "exterior", "sign"]
+  },
+  {
+    "description": "Short walkthrough video of the 3rd floor showing meeting rooms and directions",
+    "url": "https://videos.pexels.com/place/third-floor-tour.mp4",
+    "type": "video",
+    "tags": ["3rd floor", "meeting rooms", "directions"]
+  }
+]

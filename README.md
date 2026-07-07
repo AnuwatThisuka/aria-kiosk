@@ -32,28 +32,28 @@ Visitor (voice / touch)
 
 ## Features
 
-| | |
-|---|---|
-| 🎙️ **Real-time conversation** | Streaming voice powered by Gemini Live API — natural turn-taking, barge-in, multilingual |
-| 🧑‍💼 **Talking avatar** | Viseme-driven lip-sync matched to live audio output |
-| 🖼️ **Contextual visuals** | Pulls from your own media library first, falls back to web search |
-| 📐 **Portrait-first layout** | Purpose-built UI for vertical kiosk displays |
-| 👋 **Idle & wake detection** | Attract-mode loop until a visitor approaches or taps the screen |
-| ⏱️ **Kiosk-grade reliability** | Auto-timeout, watchdog reload, and unattended-operation safeguards |
-| ⌨️ **Accessible fallback** | On-screen text input for visitors who prefer not to speak |
+|                                |                                                                                          |
+| ------------------------------ | ---------------------------------------------------------------------------------------- |
+| 🎙️ **Real-time conversation**  | Streaming voice powered by Gemini Live API — natural turn-taking, barge-in, multilingual |
+| 🧑‍💼 **Talking avatar**          | Viseme-driven lip-sync matched to live audio output                                      |
+| 🖼️ **Contextual visuals**      | Pulls from your own media library first, falls back to web search                        |
+| 📐 **Portrait-first layout**   | Purpose-built UI for vertical kiosk displays                                             |
+| 👋 **Idle & wake detection**   | Attract-mode loop until a visitor approaches or taps the screen                          |
+| ⏱️ **Kiosk-grade reliability** | Auto-timeout, watchdog reload, and unattended-operation safeguards                       |
+| ⌨️ **Accessible fallback**     | On-screen text input for visitors who prefer not to speak                                |
 
 ## Architecture
 
-| Layer | Technology |
-|---|---|
-| Frontend | React + TypeScript |
-| Real-time AI | Gemini Live API (WebSocket) |
-| Runtime / package manager | Bun |
-| Monorepo tooling | Turborepo |
-| Orchestration backend | Hono (on Bun) |
-| Media retrieval | Qdrant / pgvector + web search fallback |
-| Avatar rendering | Live2D / viseme-based lip-sync |
-| Deployment target | Chrome kiosk mode |
+| Layer                     | Technology                                     |
+| ------------------------- | ---------------------------------------------- |
+| Frontend                  | React + TypeScript                             |
+| Real-time AI              | Gemini Live API (WebSocket)                    |
+| Runtime / package manager | Bun                                            |
+| Monorepo tooling          | Turborepo                                      |
+| Orchestration backend     | Hono (on Bun)                                  |
+| Media retrieval           | Supermemory (hybrid RAG) + web search fallback |
+| Avatar rendering          | Live2D / viseme-based lip-sync                 |
+| Deployment target         | Chrome kiosk mode                              |
 
 ## Project Structure
 
@@ -64,7 +64,7 @@ aria-kiosk/
 │   └── orchestrator/         # Token issuing, keyword extraction, media search
 ├── packages/
 │   ├── avatar-engine/        # Viseme mapping and lip-sync rendering
-│   └── media-search/         # Vector DB client + web fallback search
+│   └── media-search/         # Supermemory client + web fallback search
 ├── docs/
 │   └── architecture.md
 ├── turbo.json                # Turborepo pipeline definitions
@@ -80,13 +80,13 @@ bun install
 bun run dev
 ```
 
-Configure `GEMINI_API_KEY` and your vector DB connection in `.env` before running — see `.env.example` for the full list of required variables.
+Configure `GEMINI_API_KEY` and `SUPERMEMORY_API_KEY` in `.env` before running — see `.env.example` for the full list of required variables.
 
 ## Roadmap
 
 - [ ] Scaffold React kiosk frontend with Gemini Live WebSocket client
 - [ ] Avatar lip-sync engine (viseme mapping)
-- [ ] Media search service (vector DB + web fallback)
+- [ ] Media search service (Supermemory RAG + web fallback)
 - [ ] Wake-trigger integration (camera / button / sensor)
 - [ ] Kiosk-mode deployment with watchdog recovery
 
