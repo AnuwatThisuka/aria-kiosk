@@ -50,7 +50,7 @@ Visitor (voice / touch)
 | Real-time AI | Gemini Live API (WebSocket) |
 | Runtime / package manager | Bun |
 | Monorepo tooling | Turborepo |
-| Orchestration backend | Fastify (on Bun) |
+| Orchestration backend | Hono (on Bun) |
 | Media retrieval | Qdrant / pgvector + web search fallback |
 | Avatar rendering | Live2D / viseme-based lip-sync |
 | Deployment target | Chrome kiosk mode |
