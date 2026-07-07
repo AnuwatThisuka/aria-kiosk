@@ -13,7 +13,7 @@ See `README.md` for the product overview and `IMPLEMENTATION_PLAN.md` for the ph
 - **Package manager / runtime:** Bun (not Node/npm — use Bun APIs and `bun` commands throughout)
 - **Monorepo tooling:** Turborepo (task orchestration, caching) on top of Bun workspaces
 - **Frontend:** React + TypeScript, runs in Chrome kiosk mode on a portrait display
-- **Orchestrator backend:** Fastify + TypeScript, running on Bun
+- **Orchestrator backend:** Hono + TypeScript, running on Bun
 - **Real-time AI:** Gemini Live API (WebSocket, streaming STT+LLM+TTS)
 - **RAG / knowledge & media retrieval:** Supermemory (`supermemory` package)
 - **Avatar:** Live2D / viseme-driven lip-sync
@@ -25,7 +25,7 @@ See `README.md` for the product overview and `IMPLEMENTATION_PLAN.md` for the ph
 aria-kiosk/
 ├── apps/
 │   ├── kiosk-frontend/       # React app for the vertical display
-│   └── orchestrator/         # Fastify backend: token issuing, Supermemory queries, media search
+│   └── orchestrator/         # Hono backend: token issuing, Supermemory queries, media search
 ├── packages/
 │   ├── avatar-engine/        # Viseme mapping and lip-sync rendering
 │   └── media-search/         # Supermemory client + web fallback search
