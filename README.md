@@ -48,7 +48,9 @@ Visitor (voice / touch)
 |---|---|
 | Frontend | React + TypeScript |
 | Real-time AI | Gemini Live API (WebSocket) |
-| Orchestration backend | Node.js (Fastify) or Python (FastAPI) |
+| Runtime / package manager | Bun |
+| Monorepo tooling | Turborepo |
+| Orchestration backend | Fastify (on Bun) |
 | Media retrieval | Qdrant / pgvector + web search fallback |
 | Avatar rendering | Live2D / viseme-based lip-sync |
 | Deployment target | Chrome kiosk mode |
@@ -63,8 +65,10 @@ aria-kiosk/
 ├── packages/
 │   ├── avatar-engine/        # Viseme mapping and lip-sync rendering
 │   └── media-search/         # Vector DB client + web fallback search
-└── docs/
-    └── architecture.md
+├── docs/
+│   └── architecture.md
+├── turbo.json                # Turborepo pipeline definitions
+└── bunfig.toml                # Bun workspace/lockfile config
 ```
 
 ## Getting Started
@@ -72,8 +76,8 @@ aria-kiosk/
 ```bash
 git clone https://github.com/AnuwatThisuka/aria-kiosk.git
 cd aria-kiosk
-npm install
-npm run dev
+bun install
+bun run dev
 ```
 
 Configure `GEMINI_API_KEY` and your vector DB connection in `.env` before running — see `.env.example` for the full list of required variables.
