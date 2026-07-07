@@ -62,8 +62,9 @@ At query time, the transcript keyword/phrase is searched against `kiosk_media` f
 ## 4. Implementation Phases
 
 ### Phase 0 — Foundations (Week 1)
-- [ ] Scaffold `aria-kiosk` monorepo (`apps/kiosk-frontend`, `apps/orchestrator`)
-- [ ] Set up Supermemory account, API key, install SDK (`npm install supermemory`)
+- [ ] Scaffold `aria-kiosk` Bun workspace monorepo with Turborepo (`turbo.json` pipeline for `dev`/`build`/`lint`/`test`/`typecheck`)
+- [ ] Set up `apps/kiosk-frontend`, `apps/orchestrator`, `packages/avatar-engine`, `packages/media-search` with stub scripts so all participate in the Turborepo pipeline
+- [ ] Set up Supermemory account, API key, install SDK (`bun add supermemory`)
 - [ ] Define `containerTags` schema (`kiosk_knowledge`, `kiosk_media`)
 - [ ] Set up Gemini Live API access + ephemeral token issuing endpoint
 
