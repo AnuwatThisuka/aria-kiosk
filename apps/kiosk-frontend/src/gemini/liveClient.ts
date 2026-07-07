@@ -55,13 +55,41 @@ function reconnectDelay(attempt: number): number {
   return Math.min(500 * 2 ** (attempt - 1), 8000);
 }
 
+/** The conversation session surface the UI depends on. */
+export interface LiveSession {
+  connect(): Promise<void>;
+  sendText(text: string): Promise<void>;
+  close(): void;
+}
+
+/** Builds a session from handlers. Overridable for tests via the window hook. */
+export type SessionFactory = (handlers: AriaLiveHandlers) => LiveSession;
+
+declare global {
+  interface Window {
+    /** E2E seam: when set, replaces the real Gemini session (see e2e/). */
+    __ARIA_SESSION_FACTORY__?: SessionFactory;
+  }
+}
+
+/**
+ * Create a live session — the real Gemini-backed one, unless a test has
+ * installed a `window.__ARIA_SESSION_FACTORY__` override. Prod bundles never
+ * set that hook, so this is a no-cost seam.
+ */
+export function createLiveSession(handlers: AriaLiveHandlers): LiveSession {
+  const override =
+    typeof window !== "undefined" ? window.__ARIA_SESSION_FACTORY__ : undefined;
+  return override ? override(handlers) : new AriaLiveSession(handlers);
+}
+
 /**
  * Core conversation loop: mints a token, opens a Gemini Live session, streams
  * mic audio in and plays audio out, grounds each visitor utterance, and
  * surfaces contextual media per spoken sentence. Auto-reconnects on unexpected
  * transport drops so the kiosk recovers unattended.
  */
-export class AriaLiveSession {
+export class AriaLiveSession implements LiveSession {
   private session: Session | null = null;
   private readonly player: AudioPlayer;
   private readonly mic = new MicCapture((b64) => this.sendAudio(b64));
@@ -93,7 +121,12 @@ export class AriaLiveSession {
     this.setState(this.reconnectAttempts > 0 ? "reconnecting" : "connecting");
     try {
       const { token } = await fetchGeminiToken();
-      const ai = new GoogleGenAI({ apiKey: token });
+      // Ephemeral tokens are only served on the v1alpha API surface — without
+      // this the Live connect fails and the session falls into a reconnect loop.
+      const ai = new GoogleGenAI({
+        apiKey: token,
+        httpOptions: { apiVersion: "v1alpha" },
+      });
       this.session = await ai.live.connect({
         model: GEMINI_LIVE_MODEL,
         callbacks: {
@@ -141,9 +174,18 @@ export class AriaLiveSession {
   }
 
   private sendAudio(b64: string): void {
-    this.session?.sendRealtimeInput({
-      audio: { data: b64, mimeType: `audio/pcm;rate=${INPUT_SAMPLE_RATE}` },
-    });
+    // The mic keeps capturing across reconnects/close, but the socket is only
+    // writable while "live" — dropping frames otherwise avoids "WebSocket is
+    // already in CLOSING or CLOSED state" on a stale/closing session.
+    if (this.state !== "live" || !this.session) return;
+    try {
+      this.session.sendRealtimeInput({
+        audio: { data: b64, mimeType: `audio/pcm;rate=${INPUT_SAMPLE_RATE}` },
+      });
+    } catch {
+      // Socket closed between the state check and the send — ignore; the
+      // reconnect path will re-establish the session.
+    }
   }
 
   private handleMessage(msg: LiveServerMessage): void {

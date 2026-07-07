@@ -67,6 +67,8 @@ WEB_IMAGE_SEARCH_API_KEY=
 
 Never commit real API keys. Never print/log `.env` values in code or console output.
 
+**Single root `.env`.** There is exactly one `.env`, at the repo root — do **not** create per-package `.env` files. Bun loads `.env` from the current working directory and does **not** walk up the tree, and Turborepo runs each package's scripts with its own directory as the cwd. So any workspace script that needs env vars must load the root file explicitly with `bun --env-file=../../.env run …` (see `apps/orchestrator/package.json` `dev`/`start`/`ingest:media`). Test scripts intentionally omit `--env-file` so services stay unconfigured under `bun test` (tests mock them). The frontend (Vite) only exposes `VITE_`-prefixed vars and needs none — it gets the Gemini token from the orchestrator over `/api`.
+
 ## Conventions
 
 - **Language:** TypeScript everywhere, strict mode on. No implicit `any`.

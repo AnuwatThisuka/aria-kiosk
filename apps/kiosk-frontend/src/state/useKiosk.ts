@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useReducer, useRef, useState } from "react";
 import { MouthEnvelope } from "@aria/avatar-engine";
-import { AriaLiveSession } from "../gemini/liveClient";
+import { createLiveSession, type LiveSession } from "../gemini/liveClient";
 import type { MediaHit } from "../lib/orchestrator";
 import {
   GOODBYE_HOLD_MS,
@@ -32,7 +32,7 @@ export interface Kiosk {
  */
 export function useKiosk(): Kiosk {
   const [state, dispatch] = useReducer(kioskTransition, "idle");
-  const sessionRef = useRef<AriaLiveSession | null>(null);
+  const sessionRef = useRef<LiveSession | null>(null);
   const envelopeRef = useRef<MouthEnvelope>(new MouthEnvelope());
   const lastActivityRef = useRef<number>(Date.now());
 
@@ -89,7 +89,7 @@ export function useKiosk(): Kiosk {
     markActivity();
     dispatch({ type: "wake" });
 
-    const session = new AriaLiveSession({
+    const session = createLiveSession({
       onStateChange: (s) => {
         if (s === "live") dispatch({ type: "connected" });
         else if (s === "reconnecting") dispatch({ type: "disconnected" });

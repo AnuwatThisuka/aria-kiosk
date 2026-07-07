@@ -98,7 +98,12 @@ button:disabled {
 .wake {
   font-size: 1.3rem;
   padding: 1.1rem 2.2rem;
-  animation: pulse 2.4s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .wake {
+    animation: pulse 2.4s ease-in-out infinite;
+  }
 }
 
 @keyframes pulse {
