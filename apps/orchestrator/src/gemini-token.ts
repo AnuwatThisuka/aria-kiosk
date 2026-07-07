@@ -1,7 +1,17 @@
 import { GoogleGenAI } from "@google/genai";
 
-/** Gemini Live model the kiosk frontend connects to with the ephemeral token. */
-export const GEMINI_LIVE_MODEL = "gemini-2.0-flash-live-001";
+/**
+ * Gemini Live model the kiosk connects to with the ephemeral token. Must be a
+ * `bidiGenerateContent`-capable Live model that is actually enabled on this API
+ * key — an unavailable model is rejected with a 1008 close ("not found for
+ * bidiGenerateContent"). Verified working on this key via a live handshake.
+ * Keep in sync with the frontend's `GEMINI_LIVE_MODEL`.
+ *
+ * Availability shifts over time; on a 1008, list Live models for your key and
+ * pick a current one (e.g. a newer `gemini-2.5-flash-native-audio-*`).
+ */
+export const GEMINI_LIVE_MODEL =
+  "gemini-2.5-flash-native-audio-preview-12-2025";
 
 /** How long a minted ephemeral token stays valid before the client must re-mint. */
 const TOKEN_TTL_MS = 30 * 60 * 1000; // 30 minutes
@@ -29,7 +39,11 @@ export async function mintEphemeralToken(
     throw new Error("GEMINI_API_KEY is not set — cannot mint ephemeral token");
   }
 
-  const ai = new GoogleGenAI({ apiKey: key });
+  // Ephemeral tokens are a v1alpha feature — mint on that API surface.
+  const ai = new GoogleGenAI({
+    apiKey: key,
+    httpOptions: { apiVersion: "v1alpha" },
+  });
   const now = Date.now();
   const expireTime = new Date(now + TOKEN_TTL_MS).toISOString();
   const newSessionExpireTime = new Date(

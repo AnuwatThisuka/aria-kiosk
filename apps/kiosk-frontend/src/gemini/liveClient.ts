@@ -99,6 +99,13 @@ export class AriaLiveSession implements LiveSession {
   private intentionalClose = false;
   private reconnectAttempts = 0;
   private micStarted = false;
+  /**
+   * Identifies the current connection attempt. A dropped socket fires *both*
+   * `onerror` and `onclose`; bumping the epoch on the first one invalidates the
+   * second (and any stale prior session), so a single drop triggers exactly one
+   * reconnect instead of a doubling storm.
+   */
+  private epoch = 0;
 
   constructor(private readonly handlers: AriaLiveHandlers = {}) {
     this.player = new AudioPlayer(handlers.onAudioSamples);
@@ -118,6 +125,8 @@ export class AriaLiveSession implements LiveSession {
 
   /** Open (or re-open) the Live session. Mic is started once and reused. */
   private async openSession(): Promise<void> {
+    const myEpoch = ++this.epoch;
+    const isCurrent = () => myEpoch === this.epoch;
     this.setState(this.reconnectAttempts > 0 ? "reconnecting" : "connecting");
     try {
       const { token } = await fetchGeminiToken();
@@ -131,12 +140,22 @@ export class AriaLiveSession implements LiveSession {
         model: GEMINI_LIVE_MODEL,
         callbacks: {
           onopen: () => {
+            if (!isCurrent()) return;
             this.reconnectAttempts = 0;
             this.setState("live");
           },
-          onmessage: (msg) => this.handleMessage(msg),
-          onerror: (e) => this.handleClose(e),
-          onclose: () => this.handleClose(),
+          onmessage: (msg) => {
+            if (isCurrent()) this.handleMessage(msg);
+          },
+          onerror: (e) => this.handleClose(myEpoch, e),
+          onclose: (e) => {
+            // Surface the close reason — invaluable for diagnosing 1008s
+            // (bad model / auth) vs. transient network drops.
+            if (e?.code !== 1000) {
+              console.warn(`[aria] live closed: ${e?.code} ${e?.reason ?? ""}`);
+            }
+            this.handleClose(myEpoch);
+          },
         },
         config: {
           responseModalities: [Modality.AUDIO],
@@ -150,12 +169,17 @@ export class AriaLiveSession implements LiveSession {
         this.micStarted = true;
       }
     } catch (err) {
-      this.handleClose(err);
+      this.handleClose(myEpoch, err);
     }
   }
 
   /** Handle a transport close/error: reconnect unless intentionally closed. */
-  private handleClose(err?: unknown): void {
+  private handleClose(fromEpoch: number, err?: unknown): void {
+    // Ignore callbacks from a superseded attempt, and dedupe the onerror+onclose
+    // pair for this one by bumping the epoch on first handling.
+    if (fromEpoch !== this.epoch) return;
+    this.epoch++;
+
     if (this.intentionalClose) {
       this.setState("closed");
       return;

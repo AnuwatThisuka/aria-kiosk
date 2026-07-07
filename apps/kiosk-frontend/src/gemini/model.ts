@@ -3,7 +3,8 @@
  * orchestrator locks into the ephemeral token's `liveConnectConstraints`
  * (see apps/orchestrator/src/gemini-token.ts) — the token is scoped to it.
  */
-export const GEMINI_LIVE_MODEL = "gemini-2.0-flash-live-001";
+export const GEMINI_LIVE_MODEL =
+  "gemini-2.5-flash-native-audio-preview-12-2025";
 
 /** Gemini Live input sample rate (PCM16 mono). */
 export const INPUT_SAMPLE_RATE = 16000;
